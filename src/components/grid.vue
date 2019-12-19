@@ -4,9 +4,6 @@
       <div class="grid">
         <square v-for="(square, key) in squares" :key="key" :cells="square" :square="key"></square>
       </div>
-      <pre>
-        {{squares}}
-      </pre>
     </div>
 
     <div v-else>Loading...</div>
@@ -81,34 +78,12 @@ export default {
 </script>
 
 <style lang="scss">
-$cellSize: 36px;
-$squareBorderColor: black;
-$squareBorderWidth: 2px;
-
-$cellBorderColor: #aaa;
-$cellBorderWidth: 1px;
-
+@import "@/scss/_variables.scss";
 .grid {
   margin: auto;
   display: grid;
   grid-template-columns: repeat(3, 3 * $cellSize);
   grid-template-rows: repeat(3, 3 * $cellSize);
   grid-gap: $squareBorderWidth;
-}
-.square {
-  z-index: 3;
-  display: grid;
-  grid-template-columns: repeat(3, $cellSize);
-  grid-template-rows: repeat(3, $cellSize);
-  box-shadow: 0 0 0 $squareBorderWidth $squareBorderColor;
-  grid-gap: $cellBorderWidth;
-}
-.cell {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  align-items: center;
-  box-shadow: 0 0 0 $cellBorderWidth $cellBorderColor;
 }
 </style>
