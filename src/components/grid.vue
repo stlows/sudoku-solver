@@ -4,6 +4,9 @@
       <div class="grid">
         <square v-for="(square, key) in squares" :key="key" :cells="square" :square="key"></square>
       </div>
+      <pre>
+        {{onePossible}}
+      </pre>
     </div>
 
     <div v-else>Loading...</div>
@@ -35,6 +38,9 @@ export default {
     },
     notValidated() {
       return this.cells.filter(cell => !cell.validated);
+    },
+    onePossible(){
+      return this.cells.filter(cell => cell.possibles.length === 1)
     }
   },
   methods: {
@@ -54,7 +60,41 @@ export default {
         (acc[f(curr)] = acc[f(curr)] || []).push(curr);
         return acc;
       }, {});
-    }
+    },
+    computeAllPossibles(){
+      for(var i = 0; i < this.notValidated.length; i++){
+        this.computeCellPossibles(this.notValidated[i])
+      }
+    },
+    computeCellPossibles(cell){
+      var row = this.rows[cell.row].filter(c => c.value > 0)
+      console.log(row);
+      var col = this.columns[cell.col].filter(c => c.value > 0)
+      var square = this.squares[cell.square].filter(c => c.value > 0)
+      this.handlePossibles(cell,row)
+      this.handlePossibles(cell,col)
+      this.handlePossibles(cell,square)
+    },
+    handlePossibles(cell, block){
+      for(var i = 0; i < block.length; i++){
+        if(cell.possibles.includes(block[i].value)){
+          console.log("removing:", block[i].value)
+          cell.possibles.splice(cell.possibles.indexOf(block[i].value), 1);
+        }
+      }
+    },
+    checkRow(cell){
+      this.checkBlock(cell, this.rows[cell.row])
+    },
+    checkCol(cell){
+      this.checkBlock(cell, this.columns[cell.col])
+    },
+    checkSquare(cell){
+      this.checkBlock(cell, this.squares[cell.square])
+    },
+    checkBlock(cell, block){
+      console.log(cell, block)
+    },
     //possibles(row, col) {}
   },
   created() {
@@ -63,15 +103,18 @@ export default {
       .then(res => {
         for (var row = 0; row < res.data.board.length; row++) {
           for (var col = 0; col < res.data.board[row].length; col++) {
+            var validated = res.data.board[row][col] > 0
             this.cells.push({
               value: res.data.board[row][col],
               row: row,
               col: col,
               square: this.getSquare(row, col),
-              validated: res.data.board[row][col] > 0
+              validated: validated,
+              possibles: validated ? [] : [1,2,3,4,5,6,7,8,9]
             });
           }
         }
+        this.computeAllPossibles()
       });
   }
 };

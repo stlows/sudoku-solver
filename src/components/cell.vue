@@ -1,5 +1,5 @@
 <template>
-  <div class="cell" @click="cellClicked" :class="{...borders, selected}">
+  <div class="cell" @click="cellClicked" :class="{...borders, selected, onePossible}">
     <span v-if="cell.value > 0">{{cell.value}}</span>
   </div>
 </template>
@@ -18,12 +18,18 @@ export default {
         br: (this.cell.col % 3) < 2,
         bb: (this.cell.row % 3) < 2
       }
+    },
+    onePossible(){
+      return this.cell.possibles.length === 1
     }
   },
   methods: {
     cellClicked() {
-      this.cell.selected = !this.cell.selected;
-      this.selected = !this.selected;
+      if(!this.cell.validated){
+        this.cell.selected = !this.cell.selected;
+        this.selected = !this.selected;
+      }
+      
     }
   }
 };
@@ -45,6 +51,9 @@ export default {
   }
   &.selected {
     border: 2px solid rgb(37, 29, 149);
+  }
+  &.onePossible{
+    border: 2px solid green;
   }
 }
 
