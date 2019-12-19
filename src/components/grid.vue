@@ -4,12 +4,9 @@
       <div class="grid">
         <square v-for="(square, key) in squares" :key="key" :cells="square" :square="key"></square>
       </div>
-      <pre>
-        {{onePossible}}
-      </pre>
     </div>
-
     <div v-else>Loading...</div>
+    <button @click="step">Step</button>
   </div>
 </template>
 
@@ -68,7 +65,6 @@ export default {
     },
     computeCellPossibles(cell){
       var row = this.rows[cell.row].filter(c => c.value > 0)
-      console.log(row);
       var col = this.columns[cell.col].filter(c => c.value > 0)
       var square = this.squares[cell.square].filter(c => c.value > 0)
       this.handlePossibles(cell,row)
@@ -83,19 +79,14 @@ export default {
         }
       }
     },
-    checkRow(cell){
-      this.checkBlock(cell, this.rows[cell.row])
-    },
-    checkCol(cell){
-      this.checkBlock(cell, this.columns[cell.col])
-    },
-    checkSquare(cell){
-      this.checkBlock(cell, this.squares[cell.square])
-    },
-    checkBlock(cell, block){
-      console.log(cell, block)
-    },
-    //possibles(row, col) {}
+    step(){
+      this.onePossible.forEach(cell => {
+        cell.value = cell.possibles[0]
+        cell.possibles = []
+        cell.validated = true
+      })
+      this.computeAllPossibles()
+    }
   },
   created() {
     axios
