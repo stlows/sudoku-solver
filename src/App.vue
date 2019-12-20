@@ -11,7 +11,10 @@
     <div class="col">
     <button @click="step">Step</button>
     <ol>
-      <li v-for="log in logs" :key="log.date">{{log.msg}}</li>
+      <li v-for="h in history" :key="h.timestamp">
+        <span v-if="!h.try">Cell ({{h.cell.row}}, {{h.cell.col}}) filled with a {{h.value}} since it was the only possibility.</span>
+        <span v-else>Trying to fill cell ({{h.cell.row}}, {{h.cell.col}}) with a {{h.value}}.</span>
+      </li>
     </ol>
     </div>
   </div>
@@ -25,6 +28,14 @@ export default {
   data() {
     return {
       cells: [],
+      backtrackingTree: 
+        { 
+          id: new Date().valueOf(),
+          value: "Backtracking tree",
+          children: []
+        }
+      ,
+      history: [],
       logs: []
     };
   },
@@ -44,9 +55,12 @@ export default {
     notValidated() {
       return this.cells.filter(cell => !cell.validated);
     },
-    onePossible(){
-      return this.cells.filter(cell => cell.possibles.length === 1)
-    }
+    notValidatedAndEmpty() {
+      return this.cells.filter(cell => !cell.validated && cell.value === 0);
+    },
+    // onePossible(){
+    //   return this.cells.filter(cell => cell.possibles.length === 1)
+    // }
   },
   methods: {
     log(msg){
@@ -70,44 +84,58 @@ export default {
       }, {});
     },
     computeAllPossibles(){
-      for(var i = 0; i < this.notValidated.length; i++){
-        this.computeCellPossibles(this.notValidated[i])
+      for(var i = 0; i < this.notValidatedAndEmpty.length; i++){
+        this.computeCellPossibles(this.notValidatedAndEmpty[i])
       }
     },
     computeCellPossibles(cell){
+      cell.possibles = [1,2,3,4,5,6,7,8,9]
       var row = this.rows[cell.row].filter(c => c.value > 0)
       var col = this.columns[cell.col].filter(c => c.value > 0)
       var square = this.squares[cell.square].filter(c => c.value > 0)
       this.handlePossibles(cell,row)
       this.handlePossibles(cell,col)
       this.handlePossibles(cell,square)
+      this.handlePossibles(cell, cell.triedAndNotGood)
     },
     handlePossibles(cell, block){
       for(var i = 0; i < block.length; i++){
         if(cell.possibles.includes(block[i].value)){
-          console.log("removing:", block[i].value)
           cell.possibles.splice(cell.possibles.indexOf(block[i].value), 1);
         }
       }
     },
     step(){
-      if(this.onePossible.length > 0){
-        var cell = this.onePossible[0];
-        var value = cell.possibles[0];
-        cell.value = value
-        cell.possibles = []
-        cell.validated = true
-        this.log(`Cell (${cell.row}, ${cell.col}) filled with a ${value} since it was the only possibility.`)
-      }
-      else{
-        // backtracking
-      }
-      this.computeAllPossibles()
+      // var cell = null;
+      // if(this.onePossible.length > 0){
+      //   cell = this.onePossible[0];
+      //   cell.value = cell.possibles[0]
+      //   cell.possibles = []
+      //   cell.validated = true
+      //   this.history.push({
+      //     timestamp: new Date().valueOf(),
+      //     cell,
+      //     value: cell.possibles[0],
+      //     try: false
+      //   })
+      // }
+      // else{
+        var cell = this.notValidatedAndEmpty[0]
+        this.computeCellPossibles(cell)
+        cell.value= cell.possibles[0]
+        this.history.push({
+          timestamp: new Date().valueOf(),
+          cell,
+          value: cell.possibles[0],
+          try: true
+        })
+      // }
+      // this.computeAllPossibles()
     }
   },
   created() {
     axios
-      .get("https://sugoku.herokuapp.com/board?difficulty=easy")
+      .get("https://sugoku.herokuapp.com/board?difficulty=hard")
       .then(res => {
         for (var row = 0; row < res.data.board.length; row++) {
           for (var col = 0; col < res.data.board[row].length; col++) {
@@ -118,11 +146,12 @@ export default {
               col: col,
               square: this.getSquare(row, col),
               validated: validated,
-              possibles: validated ? [] : [1,2,3,4,5,6,7,8,9]
+              //possibles: validated ? [] : [1,2,3,4,5,6,7,8,9],
+              triedAndNotGood: []
             });
           }
         }
-        this.computeAllPossibles()
+        //this.computeAllPossibles()
       });
   }
 };

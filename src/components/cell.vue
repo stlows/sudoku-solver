@@ -1,5 +1,5 @@
 <template>
-  <div class="cell" @click="cellClicked" :class="{...borders, selected, onePossible}">
+  <div class="cell" @click="cellClicked" :class="{...borders, selected}">
     <span v-if="cell.value > 0">{{cell.value}}</span>
   </div>
 </template>
@@ -19,9 +19,9 @@ export default {
         bb: (this.cell.row % 3) < 2
       }
     },
-    onePossible(){
-      return this.cell.possibles.length === 1
-    }
+    // onePossible(){
+    //   return this.cell.possibles.length === 1
+    // }
   },
   methods: {
     cellClicked() {
