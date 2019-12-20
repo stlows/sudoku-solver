@@ -97,7 +97,7 @@ export default {
         cell.value = value
         cell.possibles = []
         cell.validated = true
-        this.log("Cell (" + cell.row + ", " + cell.col + ") filled with a " + value + " since it was the only possibility.")
+        this.log(`Cell (${cell.row}, ${cell.col}) filled with a ${value} since it was the only possibility.`)
       }
       else{
         // backtracking
